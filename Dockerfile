@@ -15,7 +15,7 @@ RUN apt-get update -y && apt-get install -y \
     # For compiling python memcached module.
     zlib1g-dev libmemcached-dev \
     # For compiling python mysqlclient module.
-    libmariadbclient-dev \
+    libmariadb-dev \
     # For compiling python Pillow module.
     libjpeg-dev
 
@@ -95,7 +95,9 @@ RUN apt-get update && \
     # For video thumbnail
     ffmpeg \
     # Memcache
-    libmemcached11 libmariadbclient-dev \
+    libmemcached11 \
+    # MariaDB
+    libmariadb-dev \
     python3 \
     python3-ldap \
     # Mysql init script requirement only. Will probably be useless in the future
