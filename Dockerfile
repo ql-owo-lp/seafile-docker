@@ -1,5 +1,5 @@
 ARG SEAFILE_VERSION=8.0.7
-ARG SYSTEM=bullseye
+ARG SYSTEM=buster
 
 FROM --platform=${TARGETPLATFORM} debian:${SYSTEM} AS builder
 
@@ -34,7 +34,7 @@ RUN case "${TARGETARCH}" in \
       SEAFILE_URL="https://download.seadrive.org/seafile-server_${SEAFILE_VERSION}_x86-64.tar.gz" ;; \
     "arm64") \
       SEAFILE_URL="https://github.com/haiwen/seafile-rpi/releases/download/v${SEAFILE_VERSION}/seafile-server-${SEAFILE_VERSION}-${SYSTEM}-arm64v8.tar.gz" ;; \
-    "arm/v7") \
+    "arm") \
       SEAFILE_URL="https://github.com/haiwen/seafile-rpi/releases/download/v${SEAFILE_VERSION}/seafile-server-${SEAFILE_VERSION}-${SYSTEM}-armv7l.tar.gz" ;; \
     esac ; \
     wget -c "${SEAFILE_URL}" -O seafile-server.tar.gz && \
@@ -98,11 +98,15 @@ RUN apt-get update && \
     libmemcached11 \
     # MariaDB
     libmariadb-dev \
+    # LDAP
+    ldap-utils ca-certificates \
     python3 \
     python3-ldap \
     # Mysql init script requirement only. Will probably be useless in the future
     python3-pymysql && \
     rm -rf /var/lib/apt/lists/* ; \
+    # LDAP
+    echo "TLS_REQCERT     allow" >> /etc/ldap/ldap.conf \
     # Generate locale
     sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     dpkg-reconfigure --frontend=noninteractive locales && \
