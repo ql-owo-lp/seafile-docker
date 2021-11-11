@@ -114,6 +114,7 @@ RUN apt-get update && \
     # Create Seafile User.
     useradd -ms /bin/bash -G sudo seafile && \
     # Add user to fuse group
+    groupadd fuse && \
     usermod -a -G fuse seafile && \
     echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && \
     chown -R seafile:seafile /opt/seafile && \
