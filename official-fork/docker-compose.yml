@@ -1,0 +1,28 @@
+  seafile-official:
+    image: kevinxw/seafile
+    container_name: seafile
+    restart: unless-stopped
+    networks:
+      - seafile-net
+    profiles:
+      - seafile-disabled
+    volumes:
+      - ${SEAFILE_DIR:?Must specify seafile directory}/server:/shared
+    depends_on:
+      - seafile-db
+      - seafile-memcached
+    environment:
+      - PUID=${UID:-1000}
+      - PGID=${GID:-1000}
+      - TIME_ZONE=${TZ:-America/Los_Angeles}
+      - DB_HOST=seafile-db
+      - DB_ROOT_PASSWD=${SEAFILE_DB_ROOT_PASSWD:?Root password for Seafile MySQL must be specified}
+      - SEAFILE_SERVER_HOSTNAME=${SEAFILE_SUBDOMAIN:-drive}.${DUCKDNS_SUBDOMAIN}.duckdns.org
+      - SEAFILE_ADMIN_EMAIL=${SEAFILE_ADMIN_EMAIL:?Must speicify Seafile admin email}
+      - SEAFILE_ADMIN_PASSWORD=${SEAFILE_ADMIN_PASSWD:?Must specify Seafile admin password}
+    ports:
+      - 8234:80
+    cap_add:                                        # Needed for Seaf-Fuse inside the container
+      - SYS_ADMIN                                   # For now Docker doesn't allow it any other way
+    devices:                                        # For more information see https://github.com/docker/for-linux/issues/321
+      - "/dev/fuse:/dev/fuse"
