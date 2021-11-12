@@ -52,7 +52,7 @@ then
     /scripts/wait_for_db.sh
 fi
 
-cd seafile-server-latest
+cd /opt/seafile/seafile-server-latest
 print "Launching seafile"
 ./seafile.sh start
 ./seahub.sh start
