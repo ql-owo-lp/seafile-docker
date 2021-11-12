@@ -4,18 +4,31 @@ CONFIG_DIR="./conf"
 CCNET_CONFIG_FILE="$CONFIG_DIR/ccnet.conf"
 GUNICORN_CONFIG_FILE="$CONFIG_DIR/gunicorn.conf.py"
 SEAHUB_CONFIG_FILE="$CONFIG_DIR/seahub_settings.py"
+# Environment variables starting with the following prefix will be written to config file.
+# Number can also be added right after the prefix to allow controlling the order of the variables
+# in the generated file. e.g. SEAHUB_ABC='val' -> ABC='val', SEAHUB_001_DEF='val' -> DEF='val'
+SEAHUB_SETTING_ENV_PREFIX='SEAHUB_'
+GENERATED_CONTENT_HEADER='###### Generated Content Starts ######'
 
-if [[ -z "${COLLABORA_OFFICE_SERVER}" ]]; then
-  COLLABORA_OFFICE_ENABLE="False"
-else
-  COLLABORA_OFFICE_ENABLE="True"
-fi
+function clearGeneratedContent() {
+    sed "/^${GENERATED_CONTENT_HEADER}$/,$d" "$1"
+}
 
-if [[ -z "${ONLYOFFICE_SERVER}" ]]; then
-  ONLYOFFICE_ENABLE="False"
-else
-  ONLYOFFICE_ENABLE="True"
-fi
+function generateConfig() {
+    local cfg='# Generated Configuration..'$'\n'
+    local env_var
+    local var_name
+    local var_value
+
+    local env_vars="$(compgen -A variable | grep -E "$1.+" | sort)"
+    for env_var in ${env_vars}; do
+      var_name=$(echo ${env_var} | sed -r "s/^$1([0-9]+_)?//")
+      var_value="${!var_name}"
+      cfg="${cfg}"$'\n'"${var_name} = ${!var_value}"
+    done
+
+    echo "${cfg}"$'\n'
+}
 
 function writeCcnetConfig() {
     sed -ni '/General/!p' $CCNET_CONFIG_FILE
@@ -31,22 +44,16 @@ function writeCcnetConfig() {
 }
 
 function writeGunicornSettings() {
-    sed -ni '/8000/!p' $GUNICORN_CONFIG_FILE
+    sed -ni '/bind/!p' $GUNICORN_CONFIG_FILE
     echo "bind = \"0.0.0.0:${SEAHUB_PORT}\"" >> $GUNICORN_CONFIG_FILE
 }
 
 function writeSeahubConfiguration() {
-    local seahub_cfg='# Generated Seahub settings..'
-    local seahub_settings
-    local seahub_setting
+    clearGeneratedContent "${SEAHUB_CONFIG_FILE}"
 
-    seahub_settings=$(compgen -A variable | grep -E 'SEAHUB_SETTINGS_.+' | sort)
-    for seahub_setting in $seahub_settings; do
-      seahub_cfg=$seahub_cfg$'\n'"${seahub_setting} = ${!seahub_setting}"
-    done
-    echo "${seahub_cfg}"
+    echo "${GENERATED_CONTENT_HEADER}
 
-    echo "# Memcached
+# Memcached
 CACHES = {
   'default': {
     'BACKEND': 'django_pylibmc.memcached.PyLibMCCache',
@@ -57,15 +64,6 @@ CACHES = {
   },
 }
 COMPRESS_CACHE_BACKEND = 'locmem'
-
-# Email Setup
-EMAIL_USE_TLS                       = ${EMAIL_SMTP_TLS}
-EMAIL_HOST                          = '${EMAIL_SMTP_SERVER}'
-EMAIL_HOST_USER                     = '${EMAIL_SMTP_USER}'
-EMAIL_HOST_PASSWORD                 = '${EMAIL_SMTP_PASSWORD}'
-EMAIL_PORT                          = '${EMAIL_SMTP_PORT}'
-DEFAULT_FROM_EMAIL                  = EMAIL_HOST_USER
-SERVER_EMAIL                        = EMAIL_HOST_USER
 
 TIME_ZONE                           = '${TZ}'
 SITE_BASE                           = 'http${HTTPS_SUFFIX}://${SERVER_IP}'
@@ -94,24 +92,24 @@ FILE_SERVER_ROOT                    = 'http${HTTPS_SUFFIX}://${SERVER_IP}/seafht
 
 # Enable LibreOffice Online
 OFFICE_SERVER_TYPE = 'CollaboraOffice'
-ENABLE_OFFICE_WEB_APP = ${COLLABORA_OFFICE_ENABLE}
-OFFICE_WEB_APP_BASE_URL = 'https://${COLLABORA_OFFICE_SERVER}/hosting/discovery'
+OFFICE_WEB_APP_BASE_URL = 'http${HTTPS_SUFFIX}://${SERVER_IP}/hosting/discovery'
 WOPI_ACCESS_TOKEN_EXPIRATION = 30 * 60   # seconds
 OFFICE_WEB_APP_FILE_EXTENSION = ('odp', 'ods', 'odt', 'xls', 'xlsb', 'xlsm', 'xlsx','ppsx', 'ppt', 'pptm', 'pptx', 'doc', 'docm', 'docx')
 ENABLE_OFFICE_WEB_APP_EDIT = True
 OFFICE_WEB_APP_EDIT_FILE_EXTENSION = ('odp', 'ods', 'odt', 'xls', 'xlsb', 'xlsm', 'xlsx','ppsx', 'ppt', 'pptm', 'pptx', 'doc', 'docm', 'docx')
 
 # Only office
-ENABLE_ONLYOFFICE = ${ONLYOFFICE_ENABLE}
 VERIFY_ONLYOFFICE_CERTIFICATE = False
-ONLYOFFICE_APIJS_URL = 'https://${ONLYOFFICE_SERVER}/web-apps/apps/api/documents/api.js'
+ONLYOFFICE_APIJS_URL = 'http${HTTPS_SUFFIX}://${SERVER_IP}/web-apps/apps/api/documents/api.js'
 ONLYOFFICE_FILE_EXTENSION = ('doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx', 'odt', 'fodt', 'odp', 'fodp', 'ods', 'fods')
 ONLYOFFICE_EDIT_FILE_EXTENSION = ('docx', 'pptx', 'xlsx')
-ONLYOFFICE_JWT_SECRET = '${ONLYOFFICE_JWT_SECRET}'
 # Enable force save to let user can save file when he/she press the save button on OnlyOffice file edit page.
 ONLYOFFICE_FORCE_SAVE = True
 
-" >> $SEAHUB_CONFIG_FILE
+" > "${SEAHUB_CONFIG_FILE}"
+
+    # Write generated config
+    generateConfig "${SEAHUB_SETTING_ENV_PREFIX}" >> "${SEAHUB_CONFIG_FILE}"
 }
 
 cd /opt/seafile
