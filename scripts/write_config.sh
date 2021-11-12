@@ -7,10 +7,14 @@ SEAHUB_CONFIG_FILE="$CONFIG_DIR/seahub_settings.py"
 
 if [[ -z "${COLLABORA_OFFICE_SERVER}" ]]; then
   COLLABORA_OFFICE_ENABLE="False"
+else
+  COLLABORA_OFFICE_ENABLE="True"
 fi
 
 if [[ -z "${ONLYOFFICE_SERVER}" ]]; then
   ONLYOFFICE_ENABLE="False"
+else
+  ONLYOFFICE_ENABLE="True"
 fi
 
 function writeCcnetConfig() {
@@ -32,6 +36,16 @@ function writeGunicornSettings() {
 }
 
 function writeSeahubConfiguration() {
+    local seahub_cfg='# Generated Seahub settings..'
+    local seahub_settings
+    local seahub_setting
+
+    seahub_settings=$(compgen -A variable | grep -E 'SEAHUB_SETTINGS_.+' | sort)
+    for seahub_setting in $seahub_settings; do
+      seahub_cfg=$seahub_cfg$'\n'"${seahub_setting} = ${!seahub_setting}"
+    done
+    echo "${seahub_cfg}"
+
     echo "# Memcached
 CACHES = {
   'default': {

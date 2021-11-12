@@ -10,33 +10,37 @@ function quit() {
     exit
 }
 
+function timezoneAdjustement() {
+    if [ "$TZ" ]
+    then
+        if [ ! -f "/usr/share/zoneinfo/$TZ" ]
+        then
+            print "Invalid timezone $TZ"
+        else
+            ln -sfn "/usr/share/zoneinfo/$TZ" /etc/localtime
+            echo "$TIME_ZONE" > /etc/timezone
+            print "Local time set to $TZ"
+        fi
+    fi
+}
+
 function rightsManagement() {
     print "Checking permissions"
-    if [ "$PUID" == "" ]
-    then
-        print "PUID not set, using current"
+    if [ -z "$PUID" ]; then
         PUID=$(id -u seafile)
+    else
+        usermod -u $PUID seafile
     fi
 
-    if [ "$PGID" == "" ]
-    then
-        print "GUID not set, using current"
+    if [ -z "$PGID" ]; then
         PGID=$(id -g seafile)
+    else
+        groupmod -g $PGID seafile
     fi
 
-    print "Adjusting identifiers"
-    groupmod -g $PGID seafile
-    usermod -u $PUID seafile
-
-    dirs=("/scripts" "/opt/seafile" "/shared/conf" "/shared/logs" "/shared/media" "/shared/seafile-data" "/shared/seahub-data")
-    for dir in ${dirs[@]}
-    do
-        if [[ -d "$dir" && ("$(stat -c %u $dir)" != $PUID || "$(stat -c %g $dir)" != $PGID) ]]
-        then
-            print "Changing owner for $dir"
-            chown -R seafile:seafile $dir
-        fi
-    done
+    print "Changing owner of /shared"
+    mkdir -p /shared
+    chown -R seafile:seafile /shared
 }
 
 # Quit when receiving some signals
@@ -44,10 +48,8 @@ trap quit SIGTERM
 trap quit SIGINT
 trap quit SIGKILL
 
+timezoneAdjustement
 rightsManagement
-
-mkdir -p /shared
-chown -R seafile:seafile /shared
 
 if [ ! -f "/shared/conf/ccnet.conf" ]
 then
