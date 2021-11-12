@@ -52,13 +52,12 @@ then
     /scripts/wait_for_db.sh
 fi
 
+cd seafile-server-latest
 print "Launching seafile"
-./seafile-server-latest/seafile.sh start
-./seafile-server-latest/seahub.sh start
+./seafile.sh start
+./seahub.sh start
 
-sleep 5
 print "Starting FUSE"
-mkdir -p /seafile-fuse
-./seafile-server-latest/seaf-fuse.sh start /seafile-fuse
+./seaf-fuse.sh start -o uid=${PUID} /seafile-fuse
 
 print "Done"

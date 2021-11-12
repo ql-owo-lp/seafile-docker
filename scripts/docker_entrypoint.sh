@@ -5,6 +5,7 @@ function print() {
 }
 
 function quit() {
+    ./seafile-server-latest/seaf-fuse.sh stop
     ./seafile-server-latest/seahub.sh stop
     ./seafile-server-latest/seafile.sh stop
     exit
@@ -27,13 +28,13 @@ function timezoneAdjustement() {
 function rightsManagement() {
     print "Checking permissions"
     if [ -z "$PUID" ]; then
-        PUID=$(id -u seafile)
+        export PUID=$(id -u seafile)
     else
         usermod -u $PUID seafile
     fi
 
     if [ -z "$PGID" ]; then
-        PGID=$(id -g seafile)
+        export PGID=$(id -g seafile)
     else
         groupmod -g $PGID seafile
     fi
