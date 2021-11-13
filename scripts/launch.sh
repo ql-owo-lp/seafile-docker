@@ -67,6 +67,6 @@ print "Launching seafile"
 ./seahub.sh start
 
 print "Starting FUSE"
-./seaf-fuse.sh start -o uid=${PUID} /seafile-fuse
+./seaf-fuse.sh start -o uid=$(id -u seafile) /seafile-fuse
 
 print "Done"
