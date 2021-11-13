@@ -29,19 +29,20 @@ function rightsManagement() {
     print "Checking permissions"
     if [ -z "$PUID" ]; then
         export PUID=$(id -u seafile)
-    else
+    elif [ "$(id -u seafile)" -ne "${PUID}" ]; then
         usermod -u $PUID seafile
     fi
 
     if [ -z "$PGID" ]; then
         export PGID=$(id -g seafile)
-    else
+    elif [ "$(id -g seafile)" -ne "${PGID}" ]; then
         groupmod -g $PGID seafile
     fi
 
     print "Changing owner of /shared"
     mkdir -p /shared
     chown -R seafile:seafile /shared
+    chown -R seafile:seafile /opt/seafile
 }
 
 # Quit when receiving some signals

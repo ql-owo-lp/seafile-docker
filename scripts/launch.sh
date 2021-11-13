@@ -4,6 +4,8 @@ function print() {
     echo "$(date -Iseconds) [Launch] $@"
 }
 
+set -e
+
 cd /opt/seafile
 
 if [ ! -d "./seafile-server-latest" ]
@@ -52,11 +54,12 @@ then
     /scripts/wait_for_db.sh
 fi
 
+cd seafile-server-latest
 print "Launching seafile"
-./seafile-server-latest/seafile.sh start
-./seafile-server-latest/seahub.sh start
+./seafile.sh start
+./seahub.sh start
 
 print "Starting FUSE"
-./seafile-server-latest/seaf-fuse.sh start -o uid=${PUID} /seafile-fuse
+./seaf-fuse.sh start -o uid=${PUID} /seafile-fuse
 
 print "Done"
