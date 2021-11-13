@@ -41,6 +41,7 @@ function rightsManagement() {
 
     print "Changing owner of /shared"
     mkdir -p /shared
+    rm -rf /seafile-fuse
     chown -R seafile:seafile /shared
     chown -R seafile:seafile /opt/seafile
 }

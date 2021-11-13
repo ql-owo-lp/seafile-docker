@@ -31,7 +31,7 @@ function generateConfig() {
 }
 
 function writeCcnetConfig() {
-    sed -ni '/General/!p' $CCNET_CONFIG_FILE
+    sed -ni '/[General]/!p' $CCNET_CONFIG_FILE
     sed -ni '/SERVICE_URL/!p' $CCNET_CONFIG_FILE
     echo "[General]" >> $CCNET_CONFIG_FILE
     echo "SERVICE_URL = http${HTTPS_SUFFIX}://${SERVER_IP}" >> $CCNET_CONFIG_FILE
