@@ -104,10 +104,9 @@ RUN apt-get update && \
     python3-ldap \
     # Mysql init script requirement only. Will probably be useless in the future
     python3-pymysql && \
-    rm -rf /var/lib/apt/lists/* ; 
-
+    rm -rf /var/lib/apt/lists/* ; \
     # LDAP
-RUN    echo "TLS_REQCERT     allow" >> /etc/ldap/ldap.conf && \
+    echo "TLS_REQCERT     allow" >> /etc/ldap/ldap.conf && \
     # Generate locale
     sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     dpkg-reconfigure --frontend=noninteractive locales && \
