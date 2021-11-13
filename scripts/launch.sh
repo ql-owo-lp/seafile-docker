@@ -8,20 +8,21 @@ set -e
 
 cd /opt/seafile
 
-if [ -z "$SEAFILE_VERSION" ]; then
-    print "SEAFILE_VERSION environment variable is not set"
+if [ -z "${SEAFILE_SERVER_VERSION}" ]; then
+    print "SEAFILE_SERVER_VERSION environment variable is not set"
 fi
 
-print "Started Seafile version=$SEAFILE_VERSION"
+print "Started Seafile version=${SEAFILE_SERVER_VERSION}"
 print "Existing Seafile version=$(cat /shared/media/version)"
 
 if [ ! -d "./seafile-server-latest" ]
 then
     print "Making symlink to latest version"
-    ln -s seafile-server-$SEAFILE_VERSION seafile-server-latest
+    rm -f seafile-server-latest
+    ln -s "seafile-server-${SEAFILE_SERVER_VERSION}" seafile-server-latest
 fi
 
-if [[ ! -f "/shared/media/version" || "$(cat /shared/media/version)" != "$SEAFILE_VERSION" ]]
+if [[ ! -f "/shared/media/version" || "$(cat /shared/media/version)" != "${SEAFILE_SERVER_VERSION}" ]]
 then
     print "Removing outdated media folder"
     rm -rf /shared/media/*

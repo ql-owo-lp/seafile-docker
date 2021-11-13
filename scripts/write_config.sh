@@ -67,8 +67,8 @@ COMPRESS_CACHE_BACKEND = 'locmem'
 
 TIME_ZONE                           = '${TZ}'
 SITE_BASE                           = 'http${HTTPS_SUFFIX}://${SERVER_IP}'
-SITE_NAME                           = '${SEAFILE_SITE_NAME}'
-SITE_TITLE                          = '${SEAFILE_SITE_NAME}'
+SITE_NAME                           = 'Seafile'
+SITE_TITLE                          = 'Seafile'
 SITE_ROOT                           = '/'
 ENABLE_SIGNUP                       = False
 ACTIVATE_AFTER_REGISTRATION         = False
@@ -106,7 +106,7 @@ ONLYOFFICE_EDIT_FILE_EXTENSION = ('docx', 'pptx', 'xlsx')
 # Enable force save to let user can save file when he/she press the save button on OnlyOffice file edit page.
 ONLYOFFICE_FORCE_SAVE = True
 
-" > "${SEAHUB_CONFIG_FILE}"
+" >> "${SEAHUB_CONFIG_FILE}"
 
     # Write generated config
     generateConfig "${SEAHUB_SETTING_ENV_PREFIX}" >> "${SEAHUB_CONFIG_FILE}"
