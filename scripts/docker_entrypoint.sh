@@ -19,7 +19,7 @@ function timezoneAdjustement() {
             print "Invalid timezone $TZ"
         else
             ln -sfn "/usr/share/zoneinfo/$TZ" /etc/localtime
-            echo "$TIME_ZONE" > /etc/timezone
+            echo "$TIME_ZONE" > /etc/timezone > /dev/null 2>&1
             print "Local time set to $TZ"
         fi
     fi
@@ -41,7 +41,7 @@ function rightsManagement() {
 
     print "Changing owner of /shared"
     mkdir -p /shared
-    rm -rf /seafile-fuse
+    rm -rf /seafile-fuse > /dev/null 2>&1
     chown -R seafile:seafile /shared
     chown -R seafile:seafile /opt/seafile
 }
